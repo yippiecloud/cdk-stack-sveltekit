@@ -6,7 +6,7 @@
   },
   "main": "lib/cdk-stack-sveltekit.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm install --prefix example && npm run build --prefix example",
     "watch": "tsc -w",
     "test": "jest",
     "deploy": "dotenv -- cdk deploy --all --require-approval never",
@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@aws-cdk/core": "1.119.0",
-    "source-map-support": "0.5.19",
     "@aws-cdk/aws-s3": "1.119.0",
     "@aws-cdk/aws-s3-deployment": "1.119.0",
     "@aws-cdk/aws-cloudfront": "1.119.0",
@@ -32,6 +31,9 @@
     "@aws-cdk/aws-route53": "1.119.0",
     "@aws-cdk/aws-certificatemanager": "1.119.0",
     "@aws-cdk/aws-ssm": "1.119.0",
+    "@aws-cdk/aws-apigatewayv2-integrations": "1.119.0",
+    "@aws-cdk/aws-apigatewayv2": "1.119.0",
+    "@aws-cdk/aws-lambda": "1.119.0",
     "dotenv-cli": "4.0.0"
   }
 }

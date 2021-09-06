@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
 import { App } from '@aws-cdk/core';
 import { CdkStackSveltekit } from '../lib/cdk-stack-sveltekit';
 
-const domainName = process.env.DOMAINNAME || '';
-const certificateArn = process.env.AWS_CERTIFICATEARN || '';
-const hostedZoneId = process.env.AWS_HOSTEDZONEID;
-const awsRegion = process.env.AWS_REGION;
-const awsAccount = process.env.AWS_ACCOUNT;
+const namespace = process.env.CDK_NAMESPACE!;
+const domainName = process.env.CDK_DOMAINNAME!;
+const hostedZoneId = process.env.CDK_HOSTEDZONEID!;
+const awsRegion = process.env.CDK_AWSREGION!;
+const awsAccount = process.env.CDK_AWSACCOUNT!;
 
 const app = new App({
   context: {
@@ -19,5 +18,10 @@ const app = new App({
 });
 
 new CdkStackSveltekit(app, 'CdkStackSveltekitStack', {
+  namespace,
+  domainName,
+  hostName: 'abcdef',
+  serverPath: 'example/.svelte-kit/output/server-bundle',
+  staticPath: 'example/.svelte-kit/output/static',
   env: { account: awsAccount, region: awsRegion },
 });
