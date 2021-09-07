@@ -9,7 +9,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "example": "degit yippiecloud/template-sveltekit example && npm install --prefix example && npm run build --prefix example",
+    "example": "degit --force yippiecloud/template-sveltekit example && npm install --prefix example && npm run build --prefix example",
     "deploy": "npm run example && dotenv -- cdk deploy --all --require-approval never",
     "destroy": "dotenv -- cdk destroy"
   },
