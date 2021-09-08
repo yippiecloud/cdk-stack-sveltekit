@@ -1,1 +1,1 @@
-# AWS-CDK SvelteKit Stack
+# AWS-CDK SvelteKit stack
