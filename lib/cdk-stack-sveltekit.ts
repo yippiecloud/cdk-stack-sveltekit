@@ -15,10 +15,10 @@ import {
   Behavior,
   ViewerProtocolPolicy,
 } from '@aws-cdk/aws-cloudfront';
-import { StringParameter } from '@aws-cdk/aws-ssm';
 import { ARecord, RecordTarget } from '@aws-cdk/aws-route53';
 import { HostedZone } from '@aws-cdk/aws-route53';
 import { CloudFrontTarget } from '@aws-cdk/aws-route53-targets';
+import { DnsValidatedCertificate } from '@aws-cdk/aws-certificatemanager';
 
 interface CdkStackSveltekitProps extends StackProps {
   namespace: string;
@@ -33,8 +33,6 @@ export class CdkStackSveltekit extends Stack {
     super(scope, id, props);
 
     const { serverPath, staticPath, namespace, domainName, hostName } = props;
-
-    const certificateArn = StringParameter.valueForStringParameter(this, `/${namespace}/CDK_CERTIFICATE_ARN`);
 
     const handler = new Function(this, 'LambdaFunctionHandler', {
       code: new AssetCode(serverPath),
@@ -58,10 +56,18 @@ export class CdkStackSveltekit extends Stack {
     const staticID = new OriginAccessIdentity(this, 'OriginAccessIdentity');
     staticBucket.grantRead(staticID);
 
+    const zone = HostedZone.fromLookup(this, 'DNSZone', { domainName });
+
+    const certificate = new DnsValidatedCertificate(this, 'Certificate', {
+      domainName: `${hostName}.${domainName}`,
+      hostedZone: zone,
+      region: 'us-east-1',
+    });
+
     const distribution = new CloudFrontWebDistribution(this, 'CloudFrontWebDistribution', {
       aliasConfiguration: {
         names: [`${hostName}.${domainName}`],
-        acmCertRef: certificateArn,
+        acmCertRef: certificate.certificateArn,
       },
       viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       priceClass: PriceClass.PRICE_CLASS_100,
@@ -104,8 +110,6 @@ export class CdkStackSveltekit extends Stack {
       distributionPaths: ['/*'],
     });
 
-    const zone = HostedZone.fromLookup(this, 'DNSZone', { domainName });
-
     const record = new ARecord(this, 'AliasRecord', {
       zone,
       recordName: `${hostName}.${domainName}`,
@@ -114,11 +118,6 @@ export class CdkStackSveltekit extends Stack {
 
     new CfnOutput(this, `AliasRecord-DomainName`, {
       value: record.domainName,
-    });
-
-    new StringParameter(this, `SSM-AliasRecord-DomainName`, {
-      parameterName: `/${namespace}/CDK_DOMAINNAME_${domainName.toUpperCase()}_${hostName.toUpperCase()}`,
-      stringValue: record.domainName,
     });
   }
 }
